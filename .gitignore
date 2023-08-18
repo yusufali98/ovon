@@ -4,7 +4,6 @@ __pycache__/
 
 # environment
 variables.sh
-habitat-lab
 
 # development
 .idea
@@ -12,6 +11,7 @@ habitat-lab
 
 # data
 data/
+runs/
 
 # logs
 tb/
