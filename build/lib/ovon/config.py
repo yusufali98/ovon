@@ -13,12 +13,6 @@ cs = ConfigStore.instance()
 
 
 @dataclass
-class CategoryIDSemanticSensorConfig(LabSensorConfig):
-    type: str = "CategoryIDSemanticSensor"
-    blank_out_prob: float = 0.0
-
-
-@dataclass
 class ClipObjectGoalSensorConfig(LabSensorConfig):
     type: str = "ClipObjectGoalSensor"
     prompt: str = "Find and go to {category}"
@@ -165,13 +159,6 @@ cs.store(
 )
 
 cs.store(
-    package=f"habitat.task.lab_sensors.category_id_semantic_sensor",
-    group="habitat/task/lab_sensors",
-    name="category_id_semantic_sensor",
-    node=CategoryIDSemanticSensorConfig,
-)
-
-cs.store(
     package=f"habitat.task.lab_sensors.clip_objectgoal_sensor",
     group="habitat/task/lab_sensors",
     name="clip_objectgoal_sensor",
@@ -266,5 +253,5 @@ class HabitatConfigPlugin(SearchPathPlugin):
     def manipulate_search_path(self, search_path: ConfigSearchPath) -> None:
         search_path.append(
             provider="habitat",
-            path="file:///coc/pskynet4/yali30/ovon_duplicate/ovon/config/tasks",
+            path="pkg://config/tasks/",
         )

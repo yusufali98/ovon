@@ -1,6 +1,6 @@
 # Record of how the environment was set up
 # Create conda environment. Mamba is recommended for faster installation.
-conda_env_name=ovon
+conda_env_name=ovon_duplicate
 mamba create -n $conda_env_name python=3.7 cmake=3.14.0 -y
 mamba install -n $conda_env_name \
   habitat-sim=0.2.3 headless pytorch=1.12.1  cudatoolkit=11.3 \

@@ -26,6 +26,120 @@ from ovon.task.sensors import ClipImageGoalSensor, ClipObjectGoalSensor
 from ovon.utils.utils import load_encoder
 
 
+@baseline_registry.register_policy
+class OVRLPolicy(NetPolicy):
+    def __init__(
+        self,
+        observation_space: spaces.Dict,
+        action_space,
+        hidden_size: int = 512,
+        num_recurrent_layers: int = 1,
+        rnn_type: str = "GRU",
+        backbone: str = "resnet50_clip_avgpool",
+        force_blind_policy: bool = False,
+        policy_config: "DictConfig" = None,
+        aux_loss_config: Optional["DictConfig"] = None,
+        fuse_keys: Optional[List[str]] = None,
+        clip_model: str = "RN50",
+        use_augmentations: bool = True,
+        augmentations_name: str = "resize",
+        use_augmentations_test_time: bool = True,
+        randomize_augmentations_over_envs: bool = False,
+        rgb_image_size: int = 224,
+        resnet_baseplanes: int = 64,
+        avgpooled_image: bool = False,
+        drop_path_rate: float = 0.0,
+        pretrained_encoder: str = None,
+        freeze_backbone: bool = False,
+        add_clip_linear_projection: bool = False,
+        num_environments: int = 1,
+        run_type: str = "train",
+    ):
+        if policy_config is not None:
+            discrete_actions = policy_config.action_distribution_type == "categorical"
+            self.action_distribution_type = policy_config.action_distribution_type
+        else:
+            discrete_actions = True
+            self.action_distribution_type = "categorical"
+
+        super().__init__(
+            OVRLPolicyNet(
+                observation_space=observation_space,
+                action_space=action_space,  # for previous action
+                hidden_size=hidden_size,
+                num_recurrent_layers=num_recurrent_layers,
+                rnn_type=rnn_type,
+                backbone=backbone,
+                fuse_keys=fuse_keys,
+                force_blind_policy=force_blind_policy,
+                discrete_actions=discrete_actions,
+                clip_model=clip_model,
+                use_augmentations=use_augmentations,
+                augmentations_name=augmentations_name,
+                use_augmentations_test_time=use_augmentations_test_time,
+                randomize_augmentations_over_envs=randomize_augmentations_over_envs,
+                rgb_image_size=rgb_image_size,
+                resnet_baseplanes=resnet_baseplanes,
+                avgpooled_image=avgpooled_image,
+                drop_path_rate=drop_path_rate,
+                pretrained_encoder=pretrained_encoder,
+                freeze_backbone=freeze_backbone,
+                run_type=run_type,
+                add_clip_linear_projection=add_clip_linear_projection,
+                num_environments=num_environments,
+            ),
+            action_space=action_space,
+            policy_config=policy_config,
+            aux_loss_config=aux_loss_config,
+        )
+
+    @classmethod
+    def from_config(
+        cls,
+        config: "DictConfig",
+        observation_space: spaces.Dict,
+        action_space,
+        **kwargs,
+    ):
+        # Exclude cameras for rendering from the observation space.
+        ignore_names: List[str] = []
+        for agent_config in config.habitat.simulator.agents.values():
+            ignore_names.extend(
+                agent_config.sim_sensors[k].uuid
+                for k in config.habitat_baselines.video_render_views
+                if k in agent_config.sim_sensors
+            )
+        filtered_obs = spaces.Dict(
+            OrderedDict(
+                ((k, v) for k, v in observation_space.items() if k not in ignore_names)
+            )
+        )
+        return cls(
+            observation_space=filtered_obs,
+            action_space=action_space,
+            hidden_size=config.habitat_baselines.rl.ppo.hidden_size,
+            rnn_type=config.habitat_baselines.rl.ddppo.rnn_type,
+            num_recurrent_layers=config.habitat_baselines.rl.ddppo.num_recurrent_layers,
+            force_blind_policy=config.habitat_baselines.force_blind_policy,
+            policy_config=config.habitat_baselines.rl.policy,
+            aux_loss_config=config.habitat_baselines.rl.auxiliary_losses,
+            fuse_keys=None,
+            backbone=config.habitat_baselines.rl.policy.backbone,
+            clip_model=config.habitat_baselines.rl.policy.clip_model,
+            use_augmentations=config.habitat_baselines.rl.policy.use_augmentations,
+            augmentations_name=config.habitat_baselines.rl.policy.augmentations_name,
+            use_augmentations_test_time=config.habitat_baselines.rl.policy.use_augmentations_test_time,
+            randomize_augmentations_over_envs=config.habitat_baselines.rl.policy.randomize_augmentations_over_envs,
+            rgb_image_size=config.habitat_baselines.rl.policy.rgb_image_size,
+            resnet_baseplanes=config.habitat_baselines.rl.policy.resnet_baseplanes,
+            avgpooled_image=config.habitat_baselines.rl.policy.avgpooled_image,
+            drop_path_rate=config.habitat_baselines.rl.policy.drop_path_rate,
+            pretrained_encoder=config.habitat_baselines.rl.policy.pretrained_encoder,
+            freeze_backbone=config.habitat_baselines.rl.policy.freeze_backbone,
+            add_clip_linear_projection=config.habitat_baselines.rl.policy.add_clip_linear_projection,
+            num_environments=config.habitat_baselines.num_environments,
+        )
+
 class OVRLPolicyNet(Net):
     r"""A baseline sequence to sequence network that concatenates instruction,
     RGB, and depth encodings before decoding an action distribution with an RNN.
@@ -91,7 +205,7 @@ class OVRLPolicyNet(Net):
                 image_size=rgb_image_size,
                 backbone="vit_base_path16",
                 visual_transform=self.visual_transform,
-                checkpoint="data/visual_encoders/ovrl-v2_MAE_base.pth",
+                checkpoint="/srv/flash1/rramrakhya3/spring_2023/ovon/data/visual_encoders/ovrl-v2_MAE_base.pth",
             )
         else:
             self.visual_encoder = VisualEncoder(
@@ -266,121 +380,6 @@ class OVRLPolicyNet(Net):
         aux_loss_state["rnn_output"] = out
 
         return out, rnn_hidden_states, aux_loss_state
-
-
-@baseline_registry.register_policy
-class OVRLPolicy(NetPolicy):
-    def __init__(
-        self,
-        observation_space: spaces.Dict,
-        action_space,
-        hidden_size: int = 512,
-        num_recurrent_layers: int = 1,
-        rnn_type: str = "GRU",
-        backbone: str = "resnet50_clip_avgpool",
-        force_blind_policy: bool = False,
-        policy_config: "DictConfig" = None,
-        aux_loss_config: Optional["DictConfig"] = None,
-        fuse_keys: Optional[List[str]] = None,
-        clip_model: str = "RN50",
-        use_augmentations: bool = True,
-        augmentations_name: str = "resize",
-        use_augmentations_test_time: bool = True,
-        randomize_augmentations_over_envs: bool = False,
-        rgb_image_size: int = 224,
-        resnet_baseplanes: int = 64,
-        avgpooled_image: bool = False,
-        drop_path_rate: float = 0.0,
-        pretrained_encoder: str = None,
-        freeze_backbone: bool = False,
-        add_clip_linear_projection: bool = False,
-        num_environments: int = 1,
-        run_type: str = "train",
-    ):
-        if policy_config is not None:
-            discrete_actions = policy_config.action_distribution_type == "categorical"
-            self.action_distribution_type = policy_config.action_distribution_type
-        else:
-            discrete_actions = True
-            self.action_distribution_type = "categorical"
-
-        super().__init__(
-            OVRLPolicyNet(
-                observation_space=observation_space,
-                action_space=action_space,  # for previous action
-                hidden_size=hidden_size,
-                num_recurrent_layers=num_recurrent_layers,
-                rnn_type=rnn_type,
-                backbone=backbone,
-                fuse_keys=fuse_keys,
-                force_blind_policy=force_blind_policy,
-                discrete_actions=discrete_actions,
-                clip_model=clip_model,
-                use_augmentations=use_augmentations,
-                augmentations_name=augmentations_name,
-                use_augmentations_test_time=use_augmentations_test_time,
-                randomize_augmentations_over_envs=randomize_augmentations_over_envs,
-                rgb_image_size=rgb_image_size,
-                resnet_baseplanes=resnet_baseplanes,
-                avgpooled_image=avgpooled_image,
-                drop_path_rate=drop_path_rate,
-                pretrained_encoder=pretrained_encoder,
-                freeze_backbone=freeze_backbone,
-                run_type=run_type,
-                add_clip_linear_projection=add_clip_linear_projection,
-                num_environments=num_environments,
-            ),
-            action_space=action_space,
-            policy_config=policy_config,
-            aux_loss_config=aux_loss_config,
-        )
-
-    @classmethod
-    def from_config(
-        cls,
-        config: "DictConfig",
-        observation_space: spaces.Dict,
-        action_space,
-        **kwargs,
-    ):
-        # Exclude cameras for rendering from the observation space.
-        ignore_names: List[str] = []
-        for agent_config in config.habitat.simulator.agents.values():
-            ignore_names.extend(
-                agent_config.sim_sensors[k].uuid
-                for k in config.habitat_baselines.video_render_views
-                if k in agent_config.sim_sensors
-            )
-        filtered_obs = spaces.Dict(
-            OrderedDict(
-                ((k, v) for k, v in observation_space.items() if k not in ignore_names)
-            )
-        )
-        return cls(
-            observation_space=filtered_obs,
-            action_space=action_space,
-            hidden_size=config.habitat_baselines.rl.ppo.hidden_size,
-            rnn_type=config.habitat_baselines.rl.ddppo.rnn_type,
-            num_recurrent_layers=config.habitat_baselines.rl.ddppo.num_recurrent_layers,
-            force_blind_policy=config.habitat_baselines.force_blind_policy,
-            policy_config=config.habitat_baselines.rl.policy,
-            aux_loss_config=config.habitat_baselines.rl.auxiliary_losses,
-            fuse_keys=None,
-            backbone=config.habitat_baselines.rl.policy.backbone,
-            clip_model=config.habitat_baselines.rl.policy.clip_model,
-            use_augmentations=config.habitat_baselines.rl.policy.use_augmentations,
-            augmentations_name=config.habitat_baselines.rl.policy.augmentations_name,
-            use_augmentations_test_time=config.habitat_baselines.rl.policy.use_augmentations_test_time,
-            randomize_augmentations_over_envs=config.habitat_baselines.rl.policy.randomize_augmentations_over_envs,
-            rgb_image_size=config.habitat_baselines.rl.policy.rgb_image_size,
-            resnet_baseplanes=config.habitat_baselines.rl.policy.resnet_baseplanes,
-            avgpooled_image=config.habitat_baselines.rl.policy.avgpooled_image,
-            drop_path_rate=config.habitat_baselines.rl.policy.drop_path_rate,
-            pretrained_encoder=config.habitat_baselines.rl.policy.pretrained_encoder,
-            freeze_backbone=config.habitat_baselines.rl.policy.freeze_backbone,
-            add_clip_linear_projection=config.habitat_baselines.rl.policy.add_clip_linear_projection,
-            num_environments=config.habitat_baselines.num_environments,
-        )
 
 
 class ResNetCLIPGoalEncoder(nn.Module):

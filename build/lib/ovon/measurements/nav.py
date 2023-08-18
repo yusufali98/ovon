@@ -103,26 +103,6 @@ class OVONDistanceToGoal(Measure):
                 current_position[1],
                 current_position[2],
             )
-
-
-            import math
-            if math.isinf(distance_to_target):
-                print("\n *************************************")
-                print("current_position: ", current_position)
-                # print("viewpts: ", self._episod[e_view_points)
-                print("episode._shortest_path_cache.points: ", episode._shortest_path_cache.points)
-                print("episode ID, scene ID: ", episode.episode_id, episode.scene_id)
-                
-                path = episode._shortest_path_cache
-                path.requested_start = np.array(current_position, dtype=np.float32)
-
-                print("self._sim.pathfinder.find_path(path): ", self._sim.pathfinder.find_path(path))
-                print("path.points: ", path.points)
-                print("path.geodesic_distance: ", path.geodesic_distance)
-                print("*************************************n")
-            
-            # print("shortest path cache: ", episode._shortest_path_cache.points)
-
             self._metric = distance_to_target
 
 

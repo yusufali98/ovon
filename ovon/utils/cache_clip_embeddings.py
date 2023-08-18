@@ -48,17 +48,27 @@ def load_categories_from_dataset(path):
     return list(set(categories))
 
 
-def main(dataset_path, output_path):
+def main():
+# def main(dataset_path, output_path):
+
+    dataset_path = "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2/train/content"
+
     goal_categories = load_categories_from_dataset(dataset_path)
-    val_seen_categories = load_categories_from_dataset(
-        dataset_path.replace("train", "val_seen")
-    )
-    val_unseen_easy_categories = load_categories_from_dataset(
-        dataset_path.replace("train", "val_unseen_easy")
-    )
-    val_unseen_hard_categories = load_categories_from_dataset(
-        dataset_path.replace("train", "val_unseen_hard")
-    )
+    
+    # val_seen_categories = load_categories_from_dataset(
+    #     dataset_path.replace("train", "val_seen")
+    # )
+    # val_unseen_easy_categories = load_categories_from_dataset(
+    #     dataset_path.replace("train", "val_unseen_easy")
+    # )
+    # val_unseen_hard_categories = load_categories_from_dataset(
+    #     dataset_path.replace("train", "val_unseen_hard")
+    # )
+
+    val_seen_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_seen/content")
+    val_unseen_easy_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_unseen_easy/content")
+    val_unseen_hard_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_unseen_hard/content")
+    
     goal_categories.extend(val_seen_categories)
     goal_categories.extend(val_unseen_easy_categories)
     goal_categories.extend(val_unseen_hard_categories)
@@ -72,22 +82,25 @@ def main(dataset_path, output_path):
             len(val_unseen_hard_categories),
         )
     )
+
+    output_path = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_naoki_eval_new.pkl"
     cache_embeddings(goal_categories, output_path)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--dataset-path",
-        type=str,
-        required=True,
-        help="file path of OVON dataset",
-    )
-    parser.add_argument(
-        "--output-path",
-        type=str,
-        required=True,
-        help="output path of clip features",
-    )
-    args = parser.parse_args()
-    main(args.dataset_path, args.output_path)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--dataset-path",
+    #     type=str,
+    #     required=True,
+    #     help="file path of OVON dataset",
+    # )
+    # parser.add_argument(
+    #     "--output-path",
+    #     type=str,
+    #     required=True,
+    #     help="output path of clip features",
+    # )
+    # args = parser.parse_args()
+    # main(args.dataset_path, args.output_path)
+    main()

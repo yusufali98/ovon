@@ -4,12 +4,8 @@ defaults:
   - /habitat_baselines: habitat_baselines_rl_config_base
   - /habitat_baselines/rl/policy/obs_transforms:
     - resize
-    - relabel_teacher_actions
-  - /habitat/task/lab_sensors:
-    - objnav_explorer
-  - /habitat/task/measurements:
-    - frontier_exploration_map
-  - objectnav_stretch_hm3d
+  - model: vc1_vitb
+  - objectnav_stretch_hm3d_rgbds
   - _self_
 
 habitat:
@@ -19,27 +15,38 @@ habitat:
   task:
     success_reward: 2.5
     slack_reward: -1e-3
-    lab_sensors:
-      objnav_explorer:
-        map_resolution: 128
-  dataset:
-    split: train_single_story
+
+    measurements:
+      distance_to_goal: 
+        type: OVONDistanceToGoal
+      success:
+        success_distance: 0.25
+  
   simulator:
+    type: "OVONSim-v0"
     navmesh_settings:
       agent_max_climb: 0.1
       cell_height: 0.05
+    scene_dataset: "/srv/kira-lab/share4/yali30/habitat_datasets/hm3d_train_semantics/data/versioned_data/hm3d-0.2/hm3d/hm3d_annotated_basis.scene_dataset_config.json"
+  
+  dataset:
+    type: "OVON-v1"
+    data_path: "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2/train/train.json.gz"
+    scenes_dir: "/srv/kira-lab/share4/yali30/habitat_datasets/hm3d_train_semantics/data/versioned_data/hm3d-0.2"
+
 
 habitat_baselines:
   torch_gpu_id: 0
-  tensorboard_dir: "tb"
+  tensorboard_dir: "runs/ovon/ver/cortex_test/tb/"
   video_dir: "video_dir"
   test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints"
   num_environments: 32
-  checkpoint_folder: "data/new_checkpoints"
-  trainer_name: "ver_dagger"
+  checkpoint_folder: "runs/ovon/ver/cortex_test/data/new_checkpoints/"
+  trainer_name: "ver"
   num_updates: 270000
-  log_interval: 10
+  log_interval: 1
+  log_file: 'runs/ovon/ver/cortex_test/train.log'
   num_checkpoints: 400
   # Force PyTorch to be single threaded as
   # this improves performance considerably
@@ -51,15 +58,12 @@ habitat_baselines:
   rl:
 
     policy:
-      name: "PointNavResNetCLIPPolicy"
-      obs_transforms:
-        relabel_teacher_actions:
-          teacher_label: "objnav_explorer"
+      name: "CortexPolicy"
 
     ppo:
       # ppo params
       clip_param: 0.2
-      ppo_epoch: 1
+      ppo_epoch: 4
       num_mini_batch: 2
       value_loss_coef: 0.5
       entropy_coef: 0.01
@@ -94,6 +98,5 @@ habitat_baselines:
       reset_critic: True
 
       # Model parameters
-      backbone: resnet50_clip_avgpool
       rnn_type: LSTM
       num_recurrent_layers: 2
