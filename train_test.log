@@ -1,0 +1,70 @@
+2023-08-17 23:02:37,226 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:03:10,747 agent number of parameters: 93217703
+2023-08-17 23:03:10,748 ########################### Setting up VER inference workers....
+2023-08-17 23:03:26,958 InferenceWorker-0 initialized
+2023-08-17 23:03:26,959 ########################### Setup VER inference workers !
+2023-08-17 23:03:27,006 ########################### Collected VER experience through inference workers !
+2023-08-17 23:03:27,006 ########################### Exited VER initialiser !!
+2023-08-17 23:11:09,877 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:11:14,218 agent number of parameters: 93217703
+2023-08-17 23:11:14,220 ########################### Setting up VER inference workers....
+2023-08-17 23:11:29,362 InferenceWorker-0 initialized
+2023-08-17 23:11:29,363 ########################### Setup VER inference workers !
+2023-08-17 23:11:29,421 ########################### Collected VER experience through inference workers !
+2023-08-17 23:11:29,421 ########################### Exited VER initialiser !!
+2023-08-17 23:18:58,082 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:19:02,423 agent number of parameters: 93217703
+2023-08-17 23:19:02,425 ########################### Setting up VER inference workers....
+2023-08-17 23:19:18,002 InferenceWorker-0 initialized
+2023-08-17 23:19:18,003 ########################### Setup VER inference workers !
+2023-08-17 23:19:18,056 ########################### Collected VER experience through inference workers !
+2023-08-17 23:19:18,056 ########################### Exited VER initialiser !!
+2023-08-17 23:26:33,295 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:26:37,628 agent number of parameters: 93217703
+2023-08-17 23:26:37,630 ########################### Setting up VER inference workers....
+2023-08-17 23:26:53,750 InferenceWorker-0 initialized
+2023-08-17 23:26:53,751 ########################### Setup VER inference workers !
+2023-08-17 23:26:53,808 ########################### Collected VER experience through inference workers !
+2023-08-17 23:26:53,808 ########################### Exited VER initialiser !!
+2023-08-17 23:29:59,968 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:30:04,025 agent number of parameters: 31076615
+2023-08-17 23:30:04,027 ########################### Setting up VER inference workers....
+2023-08-17 23:30:19,294 InferenceWorker-0 initialized
+2023-08-17 23:30:19,295 ########################### Setup VER inference workers !
+2023-08-17 23:30:21,156 ########################### Collected VER experience through inference workers !
+2023-08-17 23:30:21,157 ########################### Exited VER initialiser !!
+2023-08-17 23:34:00,830 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:34:04,844 agent number of parameters: 31076615
+2023-08-17 23:34:04,846 ########################### Setting up VER inference workers....
+2023-08-17 23:34:20,007 InferenceWorker-0 initialized
+2023-08-17 23:34:20,009 ########################### Setup VER inference workers !
+2023-08-17 23:34:21,824 ########################### Collected VER experience through inference workers !
+2023-08-17 23:34:21,825 ########################### Exited VER initialiser !!
+2023-08-17 23:37:29,136 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:37:33,573 agent number of parameters: 93217703
+2023-08-17 23:37:33,575 ########################### Setting up VER inference workers....
+2023-08-17 23:37:50,385 InferenceWorker-0 initialized
+2023-08-17 23:37:50,386 ########################### Setup VER inference workers !
+2023-08-17 23:37:50,439 ########################### Collected VER experience through inference workers !
+2023-08-17 23:37:50,440 ########################### Exited VER initialiser !!
+2023-08-17 23:40:44,227 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:40:48,238 agent number of parameters: 31076615
+2023-08-17 23:40:48,240 ########################### Setting up VER inference workers....
+2023-08-17 23:41:03,507 InferenceWorker-0 initialized
+2023-08-17 23:41:03,508 ########################### Setup VER inference workers !
+2023-08-17 23:41:05,435 ########################### Collected VER experience through inference workers !
+2023-08-17 23:41:05,435 ########################### Exited VER initialiser !!
+2023-08-17 23:48:27,973 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:48:32,283 agent number of parameters: 92431271
+2023-08-17 23:48:32,285 ########################### Setting up VER inference workers....
+2023-08-17 23:48:47,730 InferenceWorker-0 initialized
+2023-08-17 23:48:47,731 ########################### Setup VER inference workers !
+2023-08-17 23:48:47,785 ########################### Collected VER experience through inference workers !
+2023-08-17 23:48:47,785 ########################### Exited VER initialiser !!
+2023-08-17 23:58:24,708 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-17 23:58:29,044 agent number of parameters: 92955559
+2023-08-17 23:58:29,046 ########################### Setting up VER inference workers....
+2023-08-17 23:58:44,157 InferenceWorker-0 initialized
+2023-08-17 23:58:44,158 ########################### Setup VER inference workers !
+2023-08-17 23:58:44,209 ########################### Collected VER experience through inference workers !
+2023-08-17 23:58:44,209 ########################### Exited VER initialiser !!

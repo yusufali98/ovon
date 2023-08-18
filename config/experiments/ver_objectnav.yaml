@@ -30,7 +30,7 @@ habitat:
   
   dataset:
     type: "OVON-v1"
-    data_path: "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2"
+    data_path: "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2/train/train.json.gz"
     scenes_dir: "/srv/flash1/datasets/habitat-sim-datasets"
 
 

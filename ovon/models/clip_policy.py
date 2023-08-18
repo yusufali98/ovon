@@ -38,6 +38,7 @@ class PointNavResNetCLIPPolicy(NetPolicy):
         add_clip_linear_projection: bool = False,
         depth_ckpt: str = "",
         late_fusion: bool = False,
+        clip_model: str = "RN50",
         **kwargs,
     ):
         if policy_config is not None:
@@ -59,6 +60,7 @@ class PointNavResNetCLIPPolicy(NetPolicy):
                 add_clip_linear_projection=add_clip_linear_projection,
                 depth_ckpt=depth_ckpt,
                 late_fusion=late_fusion,
+                clip_model=clip_model,
             ),
             action_space=action_space,
             policy_config=policy_config,
@@ -110,6 +112,7 @@ class PointNavResNetCLIPPolicy(NetPolicy):
             add_clip_linear_projection=config.habitat_baselines.rl.policy.add_clip_linear_projection,
             depth_ckpt=depth_ckpt,
             late_fusion=late_fusion,
+            clip_model=config.habitat_baselines.rl.policy.clip_model,
         )
 
     def freeze_visual_encoders(self):
@@ -202,8 +205,9 @@ class PointNavResNetCLIPNet(Net):
         if (
             ClipObjectGoalSensor.cls_uuid in observation_space.spaces
             or ClipImageGoalSensor.cls_uuid in observation_space.spaces
-        ):
-            clip_embedding = 1024 if clip_model == "RN50" else 768
+        ):  
+            # NOTE: Stick to 1024-size CLIP embedding for all CLIP architectures
+            clip_embedding = 1024 if clip_model == "RN50" else 1024     # 768 ?
             print(
                 f"CLIP embedding: {clip_embedding}, "
                 f"Add CLIP linear: {add_clip_linear_projection}"
@@ -390,6 +394,7 @@ class ResNetCLIPEncoder(nn.Module):
         self.backbone_type = backbone_type
         self.rgb = "rgb" in observation_space.spaces
         self.depth = "depth" in observation_space.spaces
+        self.clip_model = clip_model
 
         if not self.is_blind:
             model, preprocess = clip.load(clip_model)
@@ -449,7 +454,13 @@ class ResNetCLIPEncoder(nn.Module):
                 self.backbone.attnpool = nn.Sequential(
                     nn.AdaptiveAvgPool2d(output_size=(1, 1)), nn.Flatten()
                 )
-                self.output_shape = (2048 + depth_size,)
+                
+                # CLIP ViT-B/16 has output size of N x 512
+                if self.clip_model == "ViT-B/16":
+                    self.output_shape = (512 + depth_size,)
+                else:
+                    self.output_shape = (2048 + depth_size,)
+            
             elif self.using_only_clip_attnpool:
                 self.output_shape = (1024 + depth_size,)
                 if ClipImageGoalSensor.cls_uuid in observation_space.spaces:
@@ -491,7 +502,13 @@ class ResNetCLIPEncoder(nn.Module):
         rgb_observations = torch.stack(
             [self.preprocess(rgb_image) for rgb_image in rgb_observations]
         )  # [BATCH x CHANNEL x HEIGHT X WIDTH] in torch.float32
-        rgb_x = self.backbone(rgb_observations)
+
+        if self.clip_model == "ViT-B/16":
+            rgb_x = self.backbone(rgb_observations.half())      # Output shape: N x 512
+            # print("######################################### Output from CLIP ViT : ", rgb_x.shape)
+        else:
+            rgb_x = self.backbone(rgb_observations)             # Output shape: N x 2048
+            # print("######################################### Output from CLIP RN50 : ", rgb_x.shape)
 
         if ClipImageGoalSensor.cls_uuid in observations:
             # Split them back out
