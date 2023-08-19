@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ovon
-#SBATCH --output=slurm_logs/ovon-ver-%j.out
-#SBATCH --error=slurm_logs/ovon-ver-%j.err
+#SBATCH --output=slurm_logs/ovon-ver-clip_vit-%j.out
+#SBATCH --error=slurm_logs/ovon-ver-clip_vit-%j.err
 #SBATCH --gpus 4
 #SBATCH --nodes 1
 #SBATCH --cpus-per-task 7
@@ -24,8 +24,9 @@ conda activate ovon_duplicate
 
 cd /srv/kira-lab/share4/yali30/ovon_duplicate/ovon
 
-TENSORBOARD_DIR="runs/ddppo_stretch/tb/ovon/ver/resnetclip_rgb_text/test/"
-CHECKPOINT_DIR="runs/ddppo_stretch/data/new_checkpoints/ovon/ver/resnetclip_rgb_text/test/"
+TENSORBOARD_DIR="runs/ovon/ver/clip_vit_b_16/tb/"
+CHECKPOINT_DIR="runs/ovon/ver/clip_vit_b_16/data/new_checkpoints/"
+LOG_DIR="runs/ovon/ver/clip_vit_b_16/train.log"
 DATA_PATH="/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2"
 
 srun python -um ovon.run \
@@ -38,6 +39,7 @@ srun python -um ovon.run \
   habitat_baselines.rl.ddppo.backbone=resnet50_clip_avgpool \
   habitat_baselines.tensorboard_dir=${TENSORBOARD_DIR} \
   habitat_baselines.checkpoint_folder=${CHECKPOINT_DIR} \
+  habitat_baselines.log_file=${LOG_DIR} \
   habitat.dataset.data_path=${DATA_PATH}/train/train.json.gz \
   +habitat/task/lab_sensors@habitat.task.lab_sensors.clip_objectgoal_sensor=clip_objectgoal_sensor \
   ~habitat.task.lab_sensors.objectgoal_sensor \
@@ -46,4 +48,6 @@ srun python -um ovon.run \
   habitat.dataset.type="OVON-v1" \
   habitat.task.measurements.distance_to_goal.type=OVONDistanceToGoal \
   habitat.simulator.type="OVONSim-v0" \
-  habitat_baselines.load_resume_state_config=False
+  habitat_baselines.load_resume_state_config=False \
+  habitat_baselines.rl.ddppo.backbone=resnet50_clip_avgpool \
+  habitat_baselines.rl.policy.clip_model=ViT-B/16

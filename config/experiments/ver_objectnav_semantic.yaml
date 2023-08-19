@@ -5,7 +5,7 @@ defaults:
   - /habitat_baselines/rl/policy/obs_transforms:
     - resize
   - model: vc1_vitl
-  - objectnav_stretch_hm3d_rgb
+  - objectnav_stretch_hm3d_rgbds
   - _self_
 
 habitat:
