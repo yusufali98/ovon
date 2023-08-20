@@ -13,9 +13,10 @@ cs = ConfigStore.instance()
 
 
 @dataclass
-class CategoryIDSemanticSensorConfig(LabSensorConfig):
-    type: str = "CategoryIDSemanticSensor"
+class OVONTrainObjectsSemanticSensorConfig(LabSensorConfig):
+    type: str = "OVONTrainObjectsSemanticSensor"
     blank_out_prob: float = 0.0
+    cache: str = "data/clip_embeddings/ovon_hm3d_cache.pkl"
 
 
 @dataclass
@@ -165,10 +166,10 @@ cs.store(
 )
 
 cs.store(
-    package=f"habitat.task.lab_sensors.category_id_semantic_sensor",
+    package=f"habitat.task.lab_sensors.ovon_train_category_semantic_sensor",
     group="habitat/task/lab_sensors",
-    name="category_id_semantic_sensor",
-    node=CategoryIDSemanticSensorConfig,
+    name="ovon_train_category_semantic_sensor",
+    node=OVONTrainObjectsSemanticSensorConfig,
 )
 
 cs.store(
@@ -267,4 +268,9 @@ class HabitatConfigPlugin(SearchPathPlugin):
         search_path.append(
             provider="habitat",
             path="file:///coc/pskynet4/yali30/ovon_duplicate/ovon/config/tasks",
+        )
+
+        search_path.append(
+            provider="habitat",
+            path="file:///coc/pskynet4/yali30/ovon_duplicate/ovon/config/agents",
         )

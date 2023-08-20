@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--run-type", "train",
+                     "--exp-config", "config/experiments/ver_objectnav_semantic.yaml",
+                     "habitat_baselines.trainer_name=ddppo",
+                     "habitat_baselines.num_environments=4",
+                     "habitat_baselines.rl.ddppo.train_encoder=False",
+                     "habitat_baselines.rl.ddppo.backbone=resnet50_clip_avgpool",
+                     "+habitat/task/lab_sensors@habitat.task.lab_sensors.clip_objectgoal_sensor=clip_objectgoal_sensor",
+                     "~habitat.task.lab_sensors.objectgoal_sensor",
+                     "habitat.task.lab_sensors.clip_objectgoal_sensor.cache=/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_naoki.pkl",
+                     "habitat.task.measurements.success.success_distance=0.25",
+                     "habitat.dataset.type=OVON-v1",
+                     "habitat.task.measurements.distance_to_goal.type=OVONDistanceToGoal",
+                     "habitat.simulator.type=OVONSim-v0",
+                     "habitat_baselines.load_resume_state_config=False",
+                     "+habitat/task/lab_sensors@habitat.task.lab_sensors.ovon_train_category_semantic_sensor=ovon_train_category_semantic_sensor",
+                     "habitat.task.lab_sensors.ovon_train_category_semantic_sensor.cache=/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_naoki_only_train.pkl",
+                     "~habitat.simulator.agents.main_agent.sim_sensors.depth_sensor",
+                    ],
+            "cwd": "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon"
+        },
+        {
+            "name": "Python: File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "justMyCode": true
+        }
+    ]
+}

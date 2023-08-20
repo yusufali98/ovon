@@ -68,3 +68,123 @@
 2023-08-17 23:58:44,158 ########################### Setup VER inference workers !
 2023-08-17 23:58:44,209 ########################### Collected VER experience through inference workers !
 2023-08-17 23:58:44,209 ########################### Exited VER initialiser !!
+2023-08-19 12:45:52,820 Resizing observation of depth: from (480, 640) to (224, 224)
+2023-08-19 12:45:52,821 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 12:45:52,823 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 12:57:13,310 Resizing observation of depth: from (480, 640) to (224, 224)
+2023-08-19 12:57:13,311 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 12:57:13,313 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 13:50:40,035 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 13:50:40,039 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 13:50:55,287 agent number of parameters: 31076615
+2023-08-19 13:50:55,289 ########################### Setting up VER inference workers....
+2023-08-19 13:51:13,413 InferenceWorker-0 initialized
+2023-08-19 13:51:13,415 ########################### Setup VER inference workers !
+2023-08-19 14:41:42,553 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 14:41:42,557 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 14:41:47,242 agent number of parameters: 31076615
+2023-08-19 14:41:47,244 ########################### Setting up VER inference workers....
+2023-08-19 14:45:49,846 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 14:45:49,850 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 14:45:54,628 agent number of parameters: 31076615
+2023-08-19 14:45:54,630 ########################### Setting up VER inference workers....
+2023-08-19 14:46:13,141 InferenceWorker-0 initialized
+2023-08-19 14:46:13,143 ########################### Setup VER inference workers !
+2023-08-19 15:10:42,628 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 15:10:42,632 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 15:10:48,449 agent number of parameters: 31076615
+2023-08-19 15:10:48,461 ########################### Setting up VER inference workers....
+2023-08-19 15:11:37,618 InferenceWorker-0 initialized
+2023-08-19 15:11:37,629 ########################### Setup VER inference workers !
+2023-08-19 15:26:24,604 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 15:26:24,608 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 15:26:29,977 agent number of parameters: 31076615
+2023-08-19 15:26:29,989 ########################### Setting up VER inference workers....
+2023-08-19 15:27:19,036 InferenceWorker-0 initialized
+2023-08-19 15:27:19,046 ########################### Setup VER inference workers !
+2023-08-19 15:29:42,318 ########################### Collected VER experience through inference workers !
+2023-08-19 15:29:42,318 ########################### Exited VER initialiser !!
+2023-08-19 15:39:51,212 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 15:39:51,216 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 15:39:56,662 agent number of parameters: 31076615
+2023-08-19 15:39:56,675 ########################### Setting up VER inference workers....
+2023-08-19 15:40:44,840 InferenceWorker-0 initialized
+2023-08-19 15:40:44,851 ########################### Setup VER inference workers !
+2023-08-19 15:46:43,939 ########################### Collected VER experience through inference workers !
+2023-08-19 15:46:43,940 ########################### Exited VER initialiser !!
+2023-08-19 16:10:51,364 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 16:10:51,368 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 16:10:56,816 agent number of parameters: 31076615
+2023-08-19 16:10:56,829 ########################### Setting up VER inference workers....
+2023-08-19 16:11:52,000 InferenceWorker-0 initialized
+2023-08-19 16:11:52,012 ########################### Setup VER inference workers !
+2023-08-19 16:16:31,244 ########################### Collected VER experience through inference workers !
+2023-08-19 16:16:31,244 ########################### Exited VER initialiser !!
+2023-08-19 17:06:45,300 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 17:06:45,304 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 17:06:50,681 agent number of parameters: 31076615
+2023-08-19 17:13:29,144 update: 1	fps: 48.137	
+2023-08-19 17:13:29,145 update: 1	env-time: 3.471s	pth-time: 1.632s	frames: 256
+2023-08-19 17:13:29,145 Average window size: 1  distance_to_goal: 8.020  distance_to_goal_reward: 0.000  reward: 0.017  soft_spl: 0.011  spl: 0.000  success: 0.000
+2023-08-19 17:13:34,133 update: 2	fps: 49.589	
+2023-08-19 17:13:34,134 update: 2	env-time: 6.267s	pth-time: 2.918s	frames: 512
+2023-08-19 17:13:34,134 Average window size: 2  distance_to_goal: 9.702  distance_to_goal_reward: 0.000  reward: 0.010  soft_spl: 0.007  spl: 0.000  success: 0.000
+2023-08-19 17:25:50,007 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 17:25:50,010 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 17:25:55,391 agent number of parameters: 31076615
+2023-08-19 19:51:39,258 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 19:51:39,262 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 19:51:45,179 agent number of parameters: 31076615
+2023-08-19 20:43:15,467 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 20:43:15,470 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 20:43:21,425 agent number of parameters: 31076615
+2023-08-19 21:19:17,983 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 21:19:17,987 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 21:19:23,882 agent number of parameters: 31076615
+2023-08-19 21:37:46,895 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 21:37:46,899 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 21:37:52,799 agent number of parameters: 31076615
+2023-08-19 21:45:09,796 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 21:45:09,799 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 21:45:15,702 agent number of parameters: 31076615
+2023-08-19 21:57:46,620 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 21:57:46,625 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 21:57:52,101 agent number of parameters: 31076615
+2023-08-19 22:14:00,889 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 22:14:00,893 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 22:14:00,909 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-19 22:14:06,375 agent number of parameters: 31076615
+2023-08-19 23:58:22,339 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-19 23:58:22,343 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-19 23:58:22,355 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-20 00:02:49,845 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-20 00:02:49,848 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-20 00:02:49,867 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-20 00:08:11,727 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-20 00:08:11,732 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-20 00:08:11,783 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-20 00:13:25,246 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-20 00:13:25,251 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-20 00:13:25,267 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-20 00:13:30,684 agent number of parameters: 35023419
+2023-08-20 00:22:40,006 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-20 00:22:40,009 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-20 00:22:40,027 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-20 00:22:45,545 agent number of parameters: 35023419
+2023-08-20 00:35:38,790 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-20 00:35:38,794 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-20 00:35:38,807 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-20 00:35:44,127 agent number of parameters: 35285563
+2023-08-20 00:38:06,363 update: 1	fps: 6.121	
+2023-08-20 00:38:06,363 update: 1	env-time: 3.382s	pth-time: 38.211s	frames: 256
+2023-08-20 00:38:06,364 Average window size: 1  distance_to_goal: 8.020  distance_to_goal_reward: 0.000  reward: 0.017  soft_spl: 0.011  spl: 0.000  success: 0.000
+2023-08-20 00:38:11,767 update: 2	fps: 10.842	
+2023-08-20 00:38:11,767 update: 2	env-time: 6.115s	pth-time: 39.740s	frames: 512
+2023-08-20 00:38:11,767 Average window size: 2  distance_to_goal: 9.702  distance_to_goal_reward: 0.000  reward: 0.010  soft_spl: 0.007  spl: 0.000  success: 0.000
+2023-08-20 00:38:16,637 update: 3	fps: 14.741	
+2023-08-20 00:38:16,637 update: 3	env-time: 9.263s	pth-time: 41.329s	frames: 768
+2023-08-20 00:38:16,638 Average window size: 3  distance_to_goal: 8.090  distance_to_goal_reward: 0.000  reward: -0.014  soft_spl: 0.008  spl: 0.000  success: 0.000
+2023-08-20 00:52:02,762 Resizing observation of rgb: from (640, 360) to (224, 224)
+2023-08-20 00:52:02,765 Resizing observation of semantic: from (640, 360) to (224, 224)
+2023-08-20 00:52:02,805 Resizing observation of train_objs_semantic: from (640, 360) to (224, 224)
+2023-08-20 00:52:08,416 agent number of parameters: 35285563

@@ -31,7 +31,7 @@ habitat:
   dataset:
     type: "OVON-v1"
     data_path: "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2/train/train.json.gz"
-    scenes_dir: "/srv/flash1/datasets/habitat-sim-datasets"
+    scenes_dir: "/srv/kira-lab/share4/yali30/habitat_datasets/hm3d_train_semantics/data/versioned_data/hm3d-0.2"
 
 
 habitat_baselines:
@@ -39,9 +39,9 @@ habitat_baselines:
   tensorboard_dir: "tb"
   video_dir: "video_dir"
   test_episode_count: -1
-  eval_ckpt_path_dir: "data/new_checkpoints"
+  eval_ckpt_path_dir: "data/test_new_checkpoints"
   num_environments: 32
-  checkpoint_folder: "data/new_checkpoints"
+  checkpoint_folder: "data/test_new_checkpoints"
   trainer_name: "ver"
   num_updates: 270000
   log_interval: 1
@@ -57,7 +57,7 @@ habitat_baselines:
   rl:
 
     policy:
-      name: "PointNavResNetCLIPPolicy"
+      name: "PointNavSemanticResNetCLIPPolicy"
 
     ppo:
       # ppo params

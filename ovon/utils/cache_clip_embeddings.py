@@ -55,23 +55,17 @@ def main():
 
     goal_categories = load_categories_from_dataset(dataset_path)
     
-    # val_seen_categories = load_categories_from_dataset(
-    #     dataset_path.replace("train", "val_seen")
-    # )
-    # val_unseen_easy_categories = load_categories_from_dataset(
-    #     dataset_path.replace("train", "val_unseen_easy")
-    # )
-    # val_unseen_hard_categories = load_categories_from_dataset(
-    #     dataset_path.replace("train", "val_unseen_hard")
-    # )
-
-    val_seen_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_seen/content")
-    val_unseen_easy_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_unseen_easy/content")
-    val_unseen_hard_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_unseen_hard/content")
+    # val_seen_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_seen/content")
+    # val_unseen_easy_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_unseen_easy/content")
+    # val_unseen_hard_categories = load_categories_from_dataset("/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v3_shuffled_cleaned/val_unseen_hard/content")
     
-    goal_categories.extend(val_seen_categories)
-    goal_categories.extend(val_unseen_easy_categories)
-    goal_categories.extend(val_unseen_hard_categories)
+    val_seen_categories = []
+    val_unseen_easy_categories = []
+    val_unseen_hard_categories = []
+
+    # goal_categories.extend(val_seen_categories)
+    # goal_categories.extend(val_unseen_easy_categories)
+    # goal_categories.extend(val_unseen_hard_categories)
 
     print("Total goal categories: {}".format(len(goal_categories)))
     print(
@@ -83,7 +77,7 @@ def main():
         )
     )
 
-    output_path = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_naoki_eval_new.pkl"
+    output_path = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_naoki_only_train.pkl"
     cache_embeddings(goal_categories, output_path)
 
 

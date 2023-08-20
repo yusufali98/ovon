@@ -146,6 +146,7 @@ class ResizeConfig(ObsTransformConfig):
         "rgb",
         "depth",
         "semantic",
+        "train_objs_semantic",
         ImageGoalRotationSensor.cls_uuid,
         ClipImageGoalSensor.cls_uuid,
     )

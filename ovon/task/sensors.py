@@ -19,14 +19,13 @@ if TYPE_CHECKING:
 
 
 @registry.register_sensor
-class CategoryIDSemanticSensor(Sensor):
+class OVONTrainObjectsSemanticSensor(Sensor):
     r"""A sensor for converting instance IDs present in the raw semantic sensor observations
-    to the corresponding category IDs by looking up the semantic annotations present in the 
-    current episode.
+    to the corresponding OVON train category IDs.
     Args:
         
     """
-    cls_uuid: str = "category_id_semantic"
+    cls_uuid: str = "train_objs_semantic"
     semantic_sensor_uuid: str = "semantic"
 
     def __init__(
@@ -49,7 +48,13 @@ class CategoryIDSemanticSensor(Sensor):
             .resolution
         )
 
-        self.mapping = None
+        # Setup OVON train goals category to ID mapping
+        self.cache = load_pickle(config.cache)
+        self.ovon_goals_map = {}
+        for idx,obj in enumerate(list(self.cache.keys())):
+            self.ovon_goals_map[obj] = idx + 1              # +1 as 0 index is reserved for categories not included in goal list
+
+        self.mapping_ovon = None
 
         super().__init__(config=config)
 
@@ -79,20 +84,26 @@ class CategoryIDSemanticSensor(Sensor):
         **kwargs: Any,
     ) -> Optional[int]:
 
-        # import pdb
-        # pdb.set_trace()
-
-        if self.mapping is None:
-            # Create instance ID to category ID mapping for the current scene
-            self.scene = self._sim.semantic_annotations()
-            instance_id_to_label_id = {int(obj.id.split("_")[-1]): obj.category.index() for obj in self.scene.objects}
-            self.mapping = np.array([ instance_id_to_label_id[i] for i in range(len(instance_id_to_label_id)) ])
-
         assert (
             'semantic' in observations
         ), "Agent not equipped with semantic sensor -> InstanceIDtoCategoryID Sensor failed !"
 
-        return np.take(self.mapping, observations['semantic'])
+        if self.mapping_ovon is None:
+            # Create instance ID to category ID mapping for the current scene
+            self.scene = self._sim.semantic_annotations()
+            instance_id_to_label_id_ovon = {}
+
+            for obj in self.scene.objects:
+                if obj.category.name() in list(self.ovon_goals_map.keys()):
+                    instance_id_to_label_id_ovon[int(obj.id.split("_")[-1])] = self.ovon_goals_map[obj.category.name()]
+                else:
+                    instance_id_to_label_id_ovon[int(obj.id.split("_")[-1])] = 0            # If object is not in train categories, then set label to 0
+
+            self.mapping_ovon = np.array([ instance_id_to_label_id_ovon[i] for i in range(len(instance_id_to_label_id_ovon)) ])
+
+            assert self.mapping_ovon.shape[0] != 0
+       
+        return np.take(self.mapping_ovon, observations['semantic'])
 
 
 @registry.register_sensor
