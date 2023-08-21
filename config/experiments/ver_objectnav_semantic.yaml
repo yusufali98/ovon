@@ -35,17 +35,17 @@ habitat:
 
 
 habitat_baselines:
-  torch_gpu_id: 0
-  tensorboard_dir: "tb"
+  torch_gpu_id: 3
+  tensorboard_dir: "runs/ovon/ver/semantic/tb"
   video_dir: "video_dir"
   test_episode_count: -1
   eval_ckpt_path_dir: "data/test_new_checkpoints"
   num_environments: 32
-  checkpoint_folder: "data/test_new_checkpoints"
+  checkpoint_folder: "runs/ovon/ver/semantic/data/new_checkpoints"
   trainer_name: "ver"
   num_updates: 270000
   log_interval: 1
-  log_file: 'train_test.log'
+  log_file: "runs/ovon/ver/semantic/train.log"
   num_checkpoints: 400
   # Force PyTorch to be single threaded as
   # this improves performance considerably
@@ -92,7 +92,7 @@ habitat_baselines:
       # Initialize just the visual encoder backbone with pretrained weights
       pretrained_encoder: False
       # Whether or not the visual encoder backbone will be trained.
-      train_encoder: False
+      train_encoder: True
       # Whether or not to reset the critic linear layer
       reset_critic: True
 

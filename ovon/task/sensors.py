@@ -88,21 +88,27 @@ class OVONTrainObjectsSemanticSensor(Sensor):
             'semantic' in observations
         ), "Agent not equipped with semantic sensor -> InstanceIDtoCategoryID Sensor failed !"
 
-        if self.mapping_ovon is None:
-            # Create instance ID to category ID mapping for the current scene
-            self.scene = self._sim.semantic_annotations()
-            instance_id_to_label_id_ovon = {}
+        # Create instance ID to category ID mapping for the current scene
+        self.scene = self._sim.semantic_annotations()
+        instance_id_to_label_id_ovon = {}
 
-            for obj in self.scene.objects:
-                if obj.category.name() in list(self.ovon_goals_map.keys()):
-                    instance_id_to_label_id_ovon[int(obj.id.split("_")[-1])] = self.ovon_goals_map[obj.category.name()]
-                else:
-                    instance_id_to_label_id_ovon[int(obj.id.split("_")[-1])] = 0            # If object is not in train categories, then set label to 0
+        for obj in self.scene.objects:
+            if obj.category.name() in list(self.ovon_goals_map.keys()):
+                instance_id_to_label_id_ovon[int(obj.id.split("_")[-1])] = self.ovon_goals_map[obj.category.name()]
+            else:
+                instance_id_to_label_id_ovon[int(obj.id.split("_")[-1])] = 0            # If object is not in train categories, then set label to 0
 
-            self.mapping_ovon = np.array([ instance_id_to_label_id_ovon[i] for i in range(len(instance_id_to_label_id_ovon)) ])
+        self.mapping_ovon = np.array([ instance_id_to_label_id_ovon[i] for i in range(len(instance_id_to_label_id_ovon)) ])
 
-            assert self.mapping_ovon.shape[0] != 0
-       
+        assert self.mapping_ovon.shape[0] != 0
+
+        # print("################# self.mapping shape: ", self.mapping_ovon.shape, "  max_sem: ", np.max(observations['semantic']), "  min_sem: ", np.min(observations['semantic']))
+        
+        if self.mapping_ovon.shape[0] < np.max(observations['semantic']):
+            print(">>> Error ....")
+            print(instance_id_to_label_id_ovon.keys())
+            print(instance_id_to_label_id_ovon.values())
+        
         return np.take(self.mapping_ovon, observations['semantic'])
 
 
