@@ -167,70 +167,40 @@ class CortexNet(Net):
         #####################################################################################################
         #################################       CORTEX Setup Starts here       ##############################
         # Create the Cortex Backbone 
-        print("Initialising Cortex Encoder with following config.....")
-        print(cortex_backbone)
+        print("Initialising Cortex Encoder .....")
+        
+        # Check which cortex mddel to load from config
+        if cortex_backbone.model.checkpoint_path.find("vitb") != -1:
+            model_type = "vc1_vitb"
+        else:
+            model_type = "vc1_vitl"
 
-        self.visual_encoder = CortexEncoder(
-            image_size=224,
-            backbone_config=cortex_backbone,
-            normalize_visual_inputs=False,
-            global_pool=False,
-            use_cls=False,
-            use_augmentations=False,
-        )
-
-        # TODO: rgb_config define the cortex backbone parameters - should be moved to main config file !
-        from omegaconf import OmegaConf
-
-        rgb_config = { 
-                       "model_type" : "VisualEncoder",
-                       "image_size" : 256,
-                       "hidden_size" : hidden_size,
-                       "use_augmentations" : False,
-                       "use_augmentations_test_time" : False,
-                       "freeze_batchnorm" : True,
-                       "freeze_backbone" : True,
-                       "global_pool" : False,
-                       "use_cls" : False,
-                     }
-        rgb_config = OmegaConf.create(rgb_config)
+        self.visual_encoder = Vc1Wrapper(model_type)
         
         # Add input dimensions for the Cortex encoder visual features
         # if not self.is_blind:
-        rnn_input_size += rgb_config.hidden_size
-        rnn_input_size_info["visual_feats"] = rgb_config.hidden_size
+        rnn_input_size += hidden_size
+        rnn_input_size_info["visual_feats"] = hidden_size
         
         # freeze Cortex backbone
-        if rgb_config.freeze_backbone:
-            for p in self.visual_encoder.backbone.parameters():
-                p.requires_grad = False
-            if rgb_config.freeze_batchnorm:
-                self.visual_encoder = convert_frozen_batchnorm(self.visual_encoder)
+        for p in self.visual_encoder.net.parameters():
+            p.requires_grad = False
+        self.visual_encoder = convert_frozen_batchnorm(self.visual_encoder)
         
         print("Initialised Cortex Encoder ! ")
         #################################       CORTEX Setup Ends here       ##############################
         #####################################################################################################
 
         visual_fc_input = self.visual_encoder.output_shape[0]
-        if ClipImageGoalSensor.cls_uuid in observation_space.spaces:
-            # Goal image is a goal embedding, gets processed as a separate
-            # input rather than along with the visual features
-            visual_fc_input -= 1024
+
         self.visual_fc = nn.Sequential(
             nn.Linear(visual_fc_input, hidden_size),
             nn.ReLU(True),
         )
+
         print("Observation space info:")
         for k, v in observation_space.spaces.items():
             print(f"  {k}: {v}")
-
-        if ObjectGoalSensor.cls_uuid in observation_space.spaces:
-            self._n_object_categories = (
-                int(observation_space.spaces[ObjectGoalSensor.cls_uuid].high[0]) + 1
-            )
-            self.obj_categories_embedding = nn.Embedding(self._n_object_categories, 32)
-            rnn_input_size += 32
-            rnn_input_size_info["object_goal"] = 32
 
         if (
             ClipObjectGoalSensor.cls_uuid in observation_space.spaces
@@ -335,21 +305,10 @@ class CortexNet(Net):
                 clip_image_goal = visual_feats[:, :1024]
                 visual_feats = self.visual_fc(visual_feats[:, 1024:])
             else:
-                # print("-----------------------------------> Generating final visual FC....")
-                # print("-----------------------------------> visual feats shape: ", visual_feats.shape)
-                # print("-----------------------------------> fc layer: ", self.visual_fc)
                 visual_feats = self.visual_fc(visual_feats)
-
-            # print("Final visual feats shape: ", visual_feats.shape)
     
             aux_loss_state["perception_embed"] = visual_feats
             x.append(visual_feats)
-
-        # print("x right now: ", len(x), x[0].shape)
-
-        if ObjectGoalSensor.cls_uuid in observations:
-            object_goal = observations[ObjectGoalSensor.cls_uuid].long()
-            x.append(self.obj_categories_embedding(object_goal).squeeze(dim=1))
 
         if ClipObjectGoalSensor.cls_uuid in observations and not self.late_fusion:
             object_goal = observations[ClipObjectGoalSensor.cls_uuid]
@@ -357,31 +316,6 @@ class CortexNet(Net):
                 object_goal = self.obj_categories_embedding(object_goal)
             x.append(object_goal)
         
-        # print("x after objectgoal: ")
-        # for i,ele in enumerate(x):
-        #     print(ele.shape)
-
-        if ClipImageGoalSensor.cls_uuid in observations and not self.late_fusion:
-            assert clip_image_goal is not None
-            if self.add_clip_linear_projection:
-                clip_image_goal = self.obj_categories_embedding(clip_image_goal)
-            x.append(clip_image_goal)
-
-        if ClipGoalSelectorSensor.cls_uuid in observations:
-            assert (
-                ClipObjectGoalSensor.cls_uuid in observations
-                and ClipImageGoalSensor.cls_uuid in observations
-            ), "Must have both object and image goals to use goal selector."
-            image_goal_embedding = x.pop()
-            object_goal = x.pop()
-            assert image_goal_embedding.shape == object_goal.shape
-            clip_goal = torch.where(
-                observations[ClipGoalSelectorSensor.cls_uuid].bool(),
-                image_goal_embedding,
-                object_goal,
-            )
-            x.append(clip_goal)
-
         if EpisodicCompassSensor.cls_uuid in observations:
             compass_observations = torch.stack(
                 [
@@ -392,16 +326,8 @@ class CortexNet(Net):
             )
             x.append(self.compass_embedding(compass_observations.squeeze(dim=1)))
         
-        # print("x after compass: ")
-        # for i,ele in enumerate(x):
-        #     print(ele.shape)
-
         if EpisodicGPSSensor.cls_uuid in observations:
             x.append(self.gps_embedding(observations[EpisodicGPSSensor.cls_uuid]))
-
-        # print("x after gps: ")
-        # for i,ele in enumerate(x):
-        #     print(ele.shape)
 
         prev_actions = prev_actions.squeeze(-1)
         start_token = torch.zeros_like(prev_actions)
@@ -412,20 +338,12 @@ class CortexNet(Net):
 
         x.append(prev_actions)
 
-        # print("x after actions: ")
-        # for i,ele in enumerate(x):
-        #     print(ele.shape)
-
         out = torch.cat(x, dim=1)
-
-        # print("x after concat: ", out.shape)
 
         out, rnn_hidden_states = self.state_encoder(
             out, rnn_hidden_states, masks, rnn_build_seq_info
         )
         aux_loss_state["rnn_output"] = out
-
-        # print("out from rnn: ", out.shape, rnn_hidden_states.shape)
 
         if self.late_fusion:
             object_goal = observations[ClipObjectGoalSensor.cls_uuid]
@@ -433,3 +351,27 @@ class CortexNet(Net):
 
         return out, rnn_hidden_states, aux_loss_state
 
+
+class Vc1Wrapper(nn.Module):
+
+    def __init__(self, vc_model_type):
+        super().__init__()
+        from vc_models.models.vit import model_utils
+
+        (
+            self.net,
+            self.embd_size,
+            self.model_transforms,
+            model_info,
+        ) = model_utils.load_model(vc_model_type)
+
+    def forward(self, obs):
+        img = obs["rgb"]
+        img = self.model_transforms(img.permute(0, 3, 1, 2) / 255.0)
+
+        ret = self.net(img)
+        return ret.to(torch.float32)
+
+    @property
+    def output_shape(self):
+        return (self.embd_size,)
