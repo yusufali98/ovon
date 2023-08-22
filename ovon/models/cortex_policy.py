@@ -202,44 +202,40 @@ class CortexNet(Net):
         for k, v in observation_space.spaces.items():
             print(f"  {k}: {v}")
 
-        if (
-            ClipObjectGoalSensor.cls_uuid in observation_space.spaces
-            or ClipImageGoalSensor.cls_uuid in observation_space.spaces
-        ):
-            clip_embedding = 1024 if clip_model == "RN50" else 768
-            print(
-                f"CLIP embedding: {clip_embedding}, "
-                f"Add CLIP linear: {add_clip_linear_projection}"
-            )
-            if self.add_clip_linear_projection:
-                self.obj_categories_embedding = nn.Linear(clip_embedding, 256)
-                object_goal_size = 256
-            else:
-                object_goal_size = clip_embedding
+        # Add clip_objectgoal embedding
+        clip_embedding = 1024 if clip_model == "RN50" else 768
+        print(
+            f"CLIP embedding: {clip_embedding}, "
+            f"Add CLIP linear: {add_clip_linear_projection}"
+        )
+        if self.add_clip_linear_projection:
+            self.obj_categories_embedding = nn.Linear(clip_embedding, 256)
+            object_goal_size = 256
+        else:
+            object_goal_size = clip_embedding
 
-            if not late_fusion:
-                rnn_input_size += object_goal_size
-                rnn_input_size_info["clip_goal"] = object_goal_size
+        if not late_fusion:
+            rnn_input_size += object_goal_size
+            rnn_input_size_info["clip_goal"] = object_goal_size
 
-        if EpisodicGPSSensor.cls_uuid in observation_space.spaces:
-            input_gps_dim = observation_space.spaces[EpisodicGPSSensor.cls_uuid].shape[
-                0
-            ]
-            self.gps_embedding = nn.Linear(input_gps_dim, 32)
-            rnn_input_size += 32
-            rnn_input_size_info["gps_embedding"] = 32
+        # Add GPS sensor embedding
+        input_gps_dim = observation_space.spaces[EpisodicGPSSensor.cls_uuid].shape[0]
+        self.gps_embedding = nn.Linear(input_gps_dim, 32)
+        rnn_input_size += 32
+        rnn_input_size_info["gps_embedding"] = 32
 
-        if EpisodicCompassSensor.cls_uuid in observation_space.spaces:
-            assert (
-                observation_space.spaces[EpisodicCompassSensor.cls_uuid].shape[0] == 1
-            ), "Expected compass with 2D rotation."
-            input_compass_dim = 2  # cos and sin of the angle
-            self.compass_embedding = nn.Linear(input_compass_dim, 32)
-            rnn_input_size += 32
-            rnn_input_size_info["compass_embedding"] = 32
+        # Add compass sensor embedding
+        assert (
+            observation_space.spaces[EpisodicCompassSensor.cls_uuid].shape[0] == 1
+        ), "Expected compass with 2D rotation."
+        input_compass_dim = 2  # cos and sin of the angle
+        self.compass_embedding = nn.Linear(input_compass_dim, 32)
+        rnn_input_size += 32
+        rnn_input_size_info["compass_embedding"] = 32
 
         self._hidden_size = hidden_size
 
+        # Print final RNN input details
         print("RNN input size info: ")
         total = 0
         for k, v in rnn_input_size_info.items():
@@ -251,6 +247,7 @@ class CortexNet(Net):
         print("  " + "-" * (len(total_str) - 2))
         print(total_str)
 
+        # Setup RNN state encoder
         self.state_encoder = build_rnn_state_encoder(
             rnn_input_size,
             self._hidden_size,
@@ -292,43 +289,33 @@ class CortexNet(Net):
             # We CANNOT use observations.get() here because
             # self.visual_encoder(observations) is an expensive operation. Therefore,
             # we need `# noqa: SIM401`
-            if (  # noqa: SIM401
-                PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY in observations
-            ): 
-                visual_feats = observations[
-                    PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY
-                ]
-            else:
-                visual_feats = self.visual_encoder(observations)
+            visual_feats = observations[PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY]
 
-            if ClipImageGoalSensor.cls_uuid in observations:
-                clip_image_goal = visual_feats[:, :1024]
-                visual_feats = self.visual_fc(visual_feats[:, 1024:])
-            else:
-                visual_feats = self.visual_fc(visual_feats)
+            visual_feats = self.visual_fc(visual_feats)
     
             aux_loss_state["perception_embed"] = visual_feats
             x.append(visual_feats)
 
-        if ClipObjectGoalSensor.cls_uuid in observations and not self.late_fusion:
-            object_goal = observations[ClipObjectGoalSensor.cls_uuid]
-            if self.add_clip_linear_projection:
-                object_goal = self.obj_categories_embedding(object_goal)
-            x.append(object_goal)
+        # Generate clip_objectgoal feats
+        object_goal = observations[ClipObjectGoalSensor.cls_uuid]
+        if self.add_clip_linear_projection:
+            object_goal = self.obj_categories_embedding(object_goal)
+        x.append(object_goal)
         
-        if EpisodicCompassSensor.cls_uuid in observations:
-            compass_observations = torch.stack(
-                [
-                    torch.cos(observations[EpisodicCompassSensor.cls_uuid]),
-                    torch.sin(observations[EpisodicCompassSensor.cls_uuid]),
-                ],
-                -1,
-            )
-            x.append(self.compass_embedding(compass_observations.squeeze(dim=1)))
+        # Generate compass sensor feats
+        compass_observations = torch.stack(
+            [
+                torch.cos(observations[EpisodicCompassSensor.cls_uuid]),
+                torch.sin(observations[EpisodicCompassSensor.cls_uuid]),
+            ],
+            -1,
+        )
+        x.append(self.compass_embedding(compass_observations.squeeze(dim=1)))
         
-        if EpisodicGPSSensor.cls_uuid in observations:
-            x.append(self.gps_embedding(observations[EpisodicGPSSensor.cls_uuid]))
-
+        # Generate GPS sensor feats
+        x.append(self.gps_embedding(observations[EpisodicGPSSensor.cls_uuid]))
+        
+        # Setup prev_actions feats
         prev_actions = prev_actions.squeeze(-1)
         start_token = torch.zeros_like(prev_actions)
         # The mask means the previous action will be zero, an extra dummy action
