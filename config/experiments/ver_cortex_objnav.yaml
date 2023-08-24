@@ -5,7 +5,7 @@ defaults:
   - /habitat_baselines/rl/policy/obs_transforms:
     - resize
   - model: vc1_vitb
-  - objectnav_stretch_hm3d_rgbds
+  - objectnav_stretch_hm3d
   - _self_
 
 habitat:
@@ -37,16 +37,16 @@ habitat:
 
 habitat_baselines:
   torch_gpu_id: 0
-  tensorboard_dir: "runs/ovon/ver/cortex_test/tb/"
+  tensorboard_dir: "runs/ovon/ver/cortex_test_comp/tb/"
   video_dir: "video_dir"
   test_episode_count: -1
   eval_ckpt_path_dir: "data/new_checkpoints"
   num_environments: 32
-  checkpoint_folder: "runs/ovon/ver/cortex_test/data/new_checkpoints/"
+  checkpoint_folder: "runs/ovon/ver/cortex_test_comp/data/new_checkpoints/"
   trainer_name: "ver"
   num_updates: 270000
-  log_interval: 1
-  log_file: 'runs/ovon/ver/cortex_test/train.log'
+  log_interval: 10
+  log_file: 'runs/ovon/ver/cortex_test_comp/train.log'
   num_checkpoints: 400
   # Force PyTorch to be single threaded as
   # this improves performance considerably

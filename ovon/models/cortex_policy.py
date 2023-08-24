@@ -175,7 +175,7 @@ class CortexNet(Net):
         else:
             model_type = "vc1_vitl"
 
-        self.visual_encoder = Vc1Wrapper(model_type)
+        self.visual_encoder = Vc1Wrapper(model_type, use_compression=False)
         
         # Add input dimensions for the Cortex encoder visual features
         # if not self.is_blind:
@@ -341,7 +341,7 @@ class CortexNet(Net):
 
 class Vc1Wrapper(nn.Module):
 
-    def __init__(self, vc_model_type):
+    def __init__(self, vc_model_type, use_compression=False):
         super().__init__()
         from vc_models.models.vit import model_utils
 
@@ -351,6 +351,15 @@ class Vc1Wrapper(nn.Module):
             self.model_transforms,
             model_info,
         ) = model_utils.load_model(vc_model_type)
+
+        # Add comrpession layer
+        from vc_models.models.compression_layer import create_compression_layer
+
+        if use_compression:
+            print("Using VC compression layer...")
+            self.compression, output_size, output_shape = create_compression_layer(self.embd_size, self.net.final_spatial)
+            self.embd_size = output_shape
+            print("VC compression layer created !")
 
     def forward(self, obs):
         img = obs["rgb"]
