@@ -31,11 +31,9 @@ habitat:
   dataset:
     type: "OVON-v1"
     data_path: "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2/train/train.json.gz"
-    scenes_dir: "/srv/kira-lab/share4/yali30/habitat_datasets/hm3d_train_semantics/data/versioned_data/hm3d-0.2"
-
 
 habitat_baselines:
-  torch_gpu_id: 3
+  torch_gpu_id: 2
   tensorboard_dir: "runs/ovon/ver/semantic/tb"
   video_dir: "video_dir"
   test_episode_count: -1
@@ -58,6 +56,10 @@ habitat_baselines:
 
     policy:
       name: "PointNavSemanticResNetCLIPPolicy"
+      semantic_masks_source: "MobileSAM"
+      mobile_SAM:
+        cache: "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_naoki_only_train.pkl"
+
 
     ppo:
       # ppo params

@@ -35,8 +35,6 @@ class OVONTrainObjectsSemanticSensor(Sensor):
         config: "DictConfig",
         **kwargs: Any,
     ):  
-        # import pdb
-        # pdb.set_trace()
 
         self._config = config
         self._sim = sim

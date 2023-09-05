@@ -22,6 +22,8 @@ from torchvision import transforms as T
 from ovon.task.sensors import (ClipGoalSelectorSensor, ClipImageGoalSensor,
                                ClipObjectGoalSensor)
 
+from ovon.models.encoders.mobile_sam import GroundedSAMPerception
+
 
 @baseline_registry.register_policy
 class PointNavSemanticResNetCLIPPolicy(NetPolicy):
@@ -29,6 +31,7 @@ class PointNavSemanticResNetCLIPPolicy(NetPolicy):
         self,
         observation_space: spaces.Dict,
         action_space,
+        mobile_SAM_config,
         hidden_size: int = 512,
         num_recurrent_layers: int = 1,
         rnn_type: str = "GRU",
@@ -39,6 +42,7 @@ class PointNavSemanticResNetCLIPPolicy(NetPolicy):
         depth_ckpt: str = "",
         late_fusion: bool = False,
         clip_model: str = "RN50",
+        semantic_masks_source: str = "GroundTruth",
         **kwargs,
     ):
         if policy_config is not None:
@@ -52,6 +56,7 @@ class PointNavSemanticResNetCLIPPolicy(NetPolicy):
             PointNavSemanticResNetCLIPNet(
                 observation_space=observation_space,
                 action_space=action_space,  # for previous action
+                mobile_SAM_config=mobile_SAM_config,
                 hidden_size=hidden_size,
                 num_recurrent_layers=num_recurrent_layers,
                 rnn_type=rnn_type,
@@ -61,6 +66,7 @@ class PointNavSemanticResNetCLIPPolicy(NetPolicy):
                 depth_ckpt=depth_ckpt,
                 late_fusion=late_fusion,
                 clip_model=clip_model,
+                semantic_masks_source=semantic_masks_source,
             ),
             action_space=action_space,
             policy_config=policy_config,
@@ -103,6 +109,7 @@ class PointNavSemanticResNetCLIPPolicy(NetPolicy):
         return cls(
             observation_space=filtered_obs,
             action_space=action_space,
+            mobile_SAM_config=config.habitat_baselines.rl.policy.mobile_SAM,
             hidden_size=config.habitat_baselines.rl.ppo.hidden_size,
             rnn_type=config.habitat_baselines.rl.ddppo.rnn_type,
             num_recurrent_layers=config.habitat_baselines.rl.ddppo.num_recurrent_layers,
@@ -113,6 +120,7 @@ class PointNavSemanticResNetCLIPPolicy(NetPolicy):
             depth_ckpt=depth_ckpt,
             late_fusion=late_fusion,
             clip_model=config.habitat_baselines.rl.policy.clip_model,
+            semantic_masks_source=config.habitat_baselines.rl.policy.semantic_masks_source,
         )
 
     def freeze_visual_encoders(self):
@@ -149,6 +157,7 @@ class PointNavSemanticResNetCLIPNet(Net):
         self,
         observation_space: spaces.Dict,
         action_space,
+        mobile_SAM_config,
         hidden_size: int,
         num_recurrent_layers: int,
         rnn_type: str,
@@ -158,6 +167,7 @@ class PointNavSemanticResNetCLIPNet(Net):
         depth_ckpt: str = "",
         add_clip_linear_projection: bool = False,
         late_fusion: bool = False,
+        semantic_masks_source: str = "GroundTruth",
     ):
         super().__init__()
         self.prev_action_embedding: nn.Module
@@ -177,9 +187,11 @@ class PointNavSemanticResNetCLIPNet(Net):
 
         self.visual_encoder = SemanticResNetCLIPEncoder(
             observation_space,
+            mobile_SAM_config=mobile_SAM_config,
             backbone_type=backbone,
             clip_model=clip_model,
             depth_ckpt=depth_ckpt,
+            semantic_masks_source=semantic_masks_source,
         )
         visual_fc_input = self.visual_encoder.output_shape[0]
         if ClipImageGoalSensor.cls_uuid in observation_space.spaces:
@@ -388,6 +400,8 @@ class SemanticResNetCLIPEncoder(nn.Module):
         backbone_type="attnpool",
         clip_model="RN50",
         depth_ckpt: str = "",
+        mobile_SAM_config = None,
+        semantic_masks_source: str = "GroundTruth",
     ):
         super().__init__()
 
@@ -395,7 +409,9 @@ class SemanticResNetCLIPEncoder(nn.Module):
         self.rgb = "rgb" in observation_space.spaces
         self.depth = "depth" in observation_space.spaces
 
-        self.semantic = "semantic" in observation_space.spaces
+        # self.semantic = "semantic" in observation_space.spaces
+        self.semantic = True
+        self.semantic_masks_source = semantic_masks_source
         
         self.clip_model = clip_model
 
@@ -440,10 +456,16 @@ class SemanticResNetCLIPEncoder(nn.Module):
 
             # Setup resnet18 encoder to process object segmentation masks
             if self.semantic:
-                assert "train_objs_semantic" in observation_space.spaces
+                # assert "train_objs_semantic" in observation_space.spaces
                 self.semantic_backbone = ResNet18SemanticEncoder()
-                semantic_size = 512                                                # NOTE: harcoded semantic feats size for now
-                
+                semantic_size = 512                                               # NOTE: harcoded semantic feats size for now
+            
+            # Setup MobileSAM piepline if required
+            if self.semantic_masks_source == "MobileSAM" and mobile_SAM_config != None:
+                device = next(self.semantic_backbone.backbone.parameters()).device.__str__()
+                self.mobile_sam = GroundedSAMPerception(config_file=mobile_SAM_config,
+                                                        device=device)
+
             if "none" in backbone_type:
                 self.backbone.attnpool = nn.Identity()
                 self.output_shape = (2048, 7, 7)
@@ -537,12 +559,36 @@ class SemanticResNetCLIPEncoder(nn.Module):
             depth_feats = self.depth_backbone({"depth": observations["depth"]})
             cnn_input.append(depth_feats)
         
-        if self.semantic and "train_objs_semantic" in observations:
-            # Extract train objects segmentation masks
-            semantic_masks = observations["train_objs_semantic"]
+        if self.semantic:
+            
+            if "train_objs_semantic" in observations:
+                # Extract train objects segmentation masks from simulator ground truth annotations
+                semantic_masks = observations["train_objs_semantic"]
+
+            if self.semantic_masks_source == "MobileSAM":
+                
+                # Transfer mobileSAM network to GPU if it is not on GPU
+                device = next(self.semantic_backbone.backbone.parameters()).device.__str__()
+                self.mobile_sam.mobile_sam.to(device=device)
+
+                # Extract segmentation masks from RGB using MobileSAM pipeline
+                obs_rgb = observations["rgb"]
+
+                num_images = obs_rgb.shape[0]
+                N, H, W, _ = obs_rgb.shape
+                semantic_masks = np.zeros((N, H, W), dtype=int)
+
+                for img_idx in range(num_images):
+                    cur_img = observations['rgb'][img_idx]
+                    cur_img = cur_img.detach().cpu().numpy()
+                    single_obs = {'rgb': cur_img}
+                    semantic_masks[img_idx] = self.mobile_sam.predict(single_obs)
+                
+                semantic_masks = torch.from_numpy(semantic_masks).to(device).unsqueeze(-1)
+            
             semantic_masks = semantic_masks.permute(
-                0, 3, 1, 2
-            )  # BATCH x CHANNEL x HEIGHT X WIDTH
+                    0, 3, 1, 2
+                )  # BATCH x CHANNEL x HEIGHT X WIDTH
             
             semantic_feats = self.semantic_backbone(semantic_masks)
             cnn_input.append(semantic_feats)

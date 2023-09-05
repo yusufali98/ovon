@@ -51,7 +51,7 @@ def load_categories_from_dataset(path):
 def main():
 # def main(dataset_path, output_path):
 
-    dataset_path = "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_naoki/ovon/hm3d/v2/train/content"
+    dataset_path = "/srv/kira-lab/share4/yali30/cow_ovon/hm3d_data/datasets/ovon_new/v3/train/content"
 
     goal_categories = load_categories_from_dataset(dataset_path)
     
@@ -77,7 +77,7 @@ def main():
         )
     )
 
-    output_path = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_naoki_only_train.pkl"
+    output_path = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/ovon_stretch_cache_ram_only_train.pkl"
     cache_embeddings(goal_categories, output_path)
 
 

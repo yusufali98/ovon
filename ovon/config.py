@@ -13,6 +13,17 @@ cs = ConfigStore.instance()
 
 
 @dataclass
+class MobileSAMConfig:
+    blank_out_prob: float = 0.0
+    cache: str = "data/clip_embeddings/ovon_hm3d_cache.pkl"
+    GROUNDING_DINO_CONFIG_PATH: str = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/perception/Grounded-Segment-Anything/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+    GROUNDING_DINO_CHECKPOINT_PATH: str = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/perception/Grounded-Segment-Anything/groundingdino_swint_ogc.pth"
+    MOBILE_SAM_CHECKPOINT_PATH: str = "/srv/kira-lab/share4/yali30/ovon_duplicate/ovon/perception/Grounded-Segment-Anything/EfficientSAM/MobileSAM/mobile_sam.pt"
+    BOX_THRESHOLD: float = 0.25
+    TEXT_THRESHOLD: float = 0.25
+    NMS_THRESHOLD: float = 0.8
+
+@dataclass
 class OVONTrainObjectsSemanticSensorConfig(LabSensorConfig):
     type: str = "OVONTrainObjectsSemanticSensor"
     blank_out_prob: float = 0.0
@@ -124,6 +135,9 @@ class OVONPolicyConfig(PolicyConfig):
     add_clip_linear_projection: bool = False
     depth_ckpt: str = ""
     late_fusion: bool = False
+
+    semantic_masks_source: str = "GroundTruth"
+    mobile_SAM: MobileSAMConfig = MobileSAMConfig()
 
     finetune: PolicyFinetuneConfig = PolicyFinetuneConfig()
 
